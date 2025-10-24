@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Krishi Kaya</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <a href="{{ url_for('home') }}">
+          <img src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="Krishi Kaya" class="logo">
+        </a>
+      </div>
+
+      <nav class="main-nav">
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('register', role='landowner') }}">Landowner Registration</a>
+        <a href="{{ url_for('register', role='labor') }}">Laborer Registration</a>
+        <a href="{{ url_for('register', role='machinery') }}">Machinery Registration</a>
+        <a href="{{ url_for('register', role='admin') }}">Admin Registration</a>
+        <a href="{{ url_for('login') }}">Login</a>
+        {% if session.get('user_id') %}
+          <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-col about">
+        <h4>About Krishi Kaya</h4>
+        <p>Krishi Kaya is a pioneering platform dedicated to bridging the gap between farmers and resources — reliable labor and modern machinery.</p>
+      </div>
+
+      <div class="footer-col latest">
+        <h4>Latest Blogs</h4>
+        <div class="blog">
+          <img src="{{ url_for('static', filename='images/blog1.jpg') }}" alt="" class="thumb">
+          <div class="txt">
+            <h5>ABC</h5>
+            <p>Thanks for the support received from krishi kaya team they addressed me with the right path...</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-col contact">
+        <h4>24/7 In Touch</h4>
+        <p><img src="{{ url_for('static', filename='images/phone-icon.jpg') }}" alt="" class="icon"> +91 80000 0000</p>
+        <p><img src="{{ url_for('static', filename='images/email-icon.jpg') }}" alt="" class="icon"> support@krishikaya.in</p>
+      </div>
+    </div>
+
+    <div class="copyright">
+      <div class="container">© {{ now().year if now is defined else '2025' }} Krishi Kaya</div>
+    </div>
+  </footer>
+
+  <!-- small inline script to close toasts if present -->
+  <script>
+    window.addEventListener('load', function(){
+      const toasts = document.querySelectorAll('.toast');
+      toasts.forEach(t => {
+        setTimeout(()=> t.style.opacity = '0', 2500);
+        setTimeout(()=> t.remove(), 3000);
+      });
+    });
+  </script>
+</body>
+</html>

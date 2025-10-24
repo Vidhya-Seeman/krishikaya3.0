@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <div class="hero-grid">
+    <div class="hero-left">
+      <h1>Krishi Kaya</h1>
+      <p class="subtitle">Harvesting Connections — Cultivating Growth</p>
+
+      <p class="lead">A smart platform connecting landowners, laborers and machinery providers. Find trusted help and modern equipment for your farming needs.</p>
+
+    
+    </div>
+
+    <div class="hero-right">
+      <div class="hero-gallery">
+        <img src="{{ url_for('static', filename='images/image1.jpg') }}" alt="agri 1">
+        <img src="{{ url_for('static', filename='images/image2.jpg') }}" alt="agri 2">
+        <img src="{{ url_for('static', filename='images/image3.jpeg') }}" alt="agri 3">
+        <img src="{{ url_for('static', filename='images/image4.jpg') }}" alt="agri 4">
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="about">
+  <h2>About Krishi Kaya</h2>
+  <p>Krishi Kaya is a pioneering platform dedicated to revolutionizing agriculture by connecting farmers with reliable labor and modern machinery. Our mission is to make essential resources accessible and affordable.</p>
+
+  <div class="values">
+    <div class="val">
+      <h3>Innovation</h3>
+      <p>We embrace technology to drive positive change.</p>
+    </div>
+    <div class="val">
+      <h3>Collaboration</h3>
+      <p>We foster partnerships across the agricultural ecosystem.</p>
+    </div>
+    <div class="val">
+      <h3>Sustainability</h3>
+      <p>We promote practices that protect the environment.</p>
+    </div>
+  </div>
+</section>
+
+<section class="blogs">
+  <h2>Latest Blogs</h2>
+  <div class="blog-grid">
+    <article class="blog-item">
+      <img src="{{ url_for('static', filename='images/blog1.jpg') }}" alt="">
+      <h4>ABC</h4>
+      <p>Thanks for the support received from krishi kaya team they addressed me with the right path...</p>
+    </article>
+
+    <article class="blog-item">
+      <img src="{{ url_for('static', filename='images/blog2.jpg') }}" alt="">
+      <h4>XYZ</h4>
+      <p>I would highly recommend this service from krishi kaya to anyone looking for a realistic price...</p>
+    </article>
+  </div>
+</section>
+{% endblock %}

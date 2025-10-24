@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="form-panel">
+  <h2>Machinery Registration</h2>
+  <form method="post" action="{{ url_for('register', role='machinery') }}">
+    <label>Owner Name</label><input name="name" required>
+    <label>Address</label><input name="address" required>
+    <label>Contact Number</label><input name="contact" required>
+    <label>District</label><input name="district" required>
+    <label>Machine Type</label><input name="machine_type" required>
+    <label>Username</label><input name="username" required>
+    <label>Password</label><input name="password" type="password" required>
+
+    <div class="form-actions">
+      <button class="btn">Register</button>
+      <a class="btn light" href="{{ url_for('home') }}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

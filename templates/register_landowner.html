@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="form-panel">
+  <h2>Landowner Registration</h2>
+  <form method="post" action="{{ url_for('register', role='landowner') }}">
+    <label>Name</label>
+    <input name="name" required>
+
+    <label>Address</label>
+    <input name="address" required>
+
+    <label>Contact Number</label>
+    <input name="contact" required>
+
+    <label>District</label>
+    <input name="district" required>
+
+    <label>Number of Acres of Land</label>
+    <input name="acres" type="number" min="0" required>
+
+    <label>Crops Grown</label>
+    <input name="crops" required>
+
+    <label>Username</label>
+    <input name="username" required>
+
+    <label>Password</label>
+    <input name="password" type="password" required>
+
+    <div class="form-actions">
+      <button class="btn" type="submit">Register</button>
+      <a class="btn light" href="{{ url_for('home') }}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

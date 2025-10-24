@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="dashboard-header" style="display:flex;justify-content:space-between;align-items:center">
+  <h2>Landowner Dashboard — {{ landowner.name or landowner.username }}</h2>
+  <div><a href="{{ url_for('logout') }}" class="logout">Logout</a></div>
+</div>
+
+<!-- Toasts -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="toast-container">
+      {% for category, msg in messages %}
+        <div class="toast {{ category }}">{{ msg }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<section class="form-panel">
+  <h3>Create Booking</h3>
+  <form method="post" action="{{ url_for('landowner_dashboard') }}">
+    <label>Service Date</label>
+    <input type="date" name="service_date" required>
+
+    <label>Number of Days</label>
+    <input type="number" name="days" min="1" value="1" required>
+
+    <label>Service Type</label>
+    <select name="service_type" id="service_type" onchange="toggleFields()">
+      <option value="labor">Labor</option>
+      <option value="machinery">Machinery</option>
+      <option value="both">Both</option>
+    </select>
+
+    <div id="labor_field" style="margin-top:8px;">
+      <label>Number of Labourers</label>
+      <input type="number" name="num_labor" min="0" placeholder="e.g., 3">
+    </div>
+
+    <div id="machine_field" style="margin-top:8px;">
+      <label>Machine Type (if machinery required)</label>
+      <input type="text" name="machine_type" placeholder="e.g., Tractor, Harvester">
+    </div>
+
+    <div class="form-actions" style="margin-top:12px;">
+      <button class="btn" type="submit">Create Booking</button>
+      <a class="btn light" href="{{ url_for('home') }}">Home</a>
+    </div>
+  </form>
+</section>
+
+<section style="margin-top:18px;">
+  <h3>Your Bookings</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th><th>Date</th><th>Days</th><th>Type</th><th>Requested</th><th>Status</th><th>Confirmed</th><th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for b in bookings %}
+        <tr>
+          <td>{{ b.id }}</td>
+          <td>{{ b.service_date }}</td>
+          <td>{{ b.days }}</td>
+          <td>{{ b.service_type }}</td>
+          <td>
+            {% if b.service_type == 'labor' %}
+              Labourers: {{ b.num_labor or '-' }}
+            {% elif b.service_type == 'machinery' %}
+              Machine: {{ b.machine_type or '-' }}
+            {% else %}
+              Labourers: {{ b.num_labor or '-' }}<br>Machine: {{ b.machine_type or '-' }}
+            {% endif %}
+          </td>
+          <td>{{ b.status }}</td>
+          <td>
+            {% if b.accepted_labors %}
+              <strong>Labor:</strong>
+              <ul>
+                {% for name in b.accepted_labors %}
+                  <li>{{ name }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+            {% if b.accepted_machines %}
+              <strong>Machine:</strong>
+              <ul>
+                {% for name in b.accepted_machines %}
+                  <li>{{ name }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+            {% if (not b.accepted_labors) and (not b.accepted_machines) %}
+              -
+            {% endif %}
+          </td>
+          <td>
+            {% if b.status == 'Rejected' %}
+              <a class="btn light" href="#create-booking" onclick="window.location.hash='create-booking'">Apply Again</a>
+            {% else %}
+              <!-- show nothing or cancel option later -->
+              -
+            {% endif %}
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="8">No bookings yet</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<script>
+function toggleFields(){
+  let type = document.getElementById('service_type').value;
+  document.getElementById('labor_field').style.display = (type === 'labor' || type === 'both') ? 'block' : 'none';
+  document.getElementById('machine_field').style.display = (type === 'machinery' || type === 'both') ? 'block' : 'none';
+}
+document.addEventListener('DOMContentLoaded', toggleFields);
+</script>
+{% endblock %}

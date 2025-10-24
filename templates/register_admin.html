@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="form-panel">
+  <h2>Admin Registration</h2>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="toast-container">
+        {% for category, msg in messages %}
+          <div class="toast {{ category }}">{{ msg }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <form method="post" action="{{ url_for('register', role='admin') }}">
+    <label>Name</label>
+    <input name="name" required>
+
+    <label>Address</label>
+    <input name="address">
+
+    <label>Contact Number</label>
+    <input name="contact">
+
+    <label>District</label>
+    <input name="district">
+
+    <label>Username</label>
+    <input name="username" required>
+
+    <label>Password</label>
+    <input name="password" type="password" required>
+
+    <div class="form-actions">
+      <button class="btn" type="submit">Register</button>
+      <a class="btn light" href="{{ url_for('home') }}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
