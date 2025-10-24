@@ -12,4 +12,4 @@ setuptools==80.9.0
 SQLAlchemy==2.0.44
 typing_extensions==4.15.0
 Werkzeug==2.3.7
-gunicorn
+
