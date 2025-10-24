@@ -8,7 +8,7 @@ body{font-family: "Segoe UI", Roboto, Arial, sans-serif;color:#222;background:#f
 /* header */
 .site-header{background:#fff;border-bottom:1px solid #e6e6e6}
 .header-inner{display:flex;align-items:center;justify-content:space-between;padding:12px 0}
-.brand .logo{height:58px}
+.brand .logo{height:80px}
 .main-nav a{margin-left:14px;color:#2b7a2b;text-decoration:none;font-weight:600}
 .main-nav a.logout{color:#c0392b}
 
@@ -23,7 +23,7 @@ body{font-family: "Segoe UI", Roboto, Arial, sans-serif;color:#222;background:#f
 
 /* gallery */
 .hero-gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.hero-gallery img{width:100%;height:120px;object-fit:cover;border-radius:6px;border:1px solid #e6e6e6}
+.hero-gallery img{width:100%;height:auto;object-fit:cover;border-radius:6px;border:1px solid #e6e6e6}
 
 /* about */
 .about{padding:28px 0}
@@ -35,7 +35,7 @@ body{font-family: "Segoe UI", Roboto, Arial, sans-serif;color:#222;background:#f
 .blogs{padding:18px 0}
 .blog-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 .blog-item{background:#fff;padding:12px;border-radius:8px;border:1px solid #eee}
-.blog-item img{width:100%;height:140px;object-fit:cover;border-radius:6px;margin-bottom:8px}
+.blog-item img{width:100%;height:auto;object-fit:cover;border-radius:6px;margin-bottom:8px}
 
 /* forms */
 .form-panel{background:#fff;padding:20px;border-radius:8px;border:1px solid #eee;max-width:720px;margin:22px auto}
