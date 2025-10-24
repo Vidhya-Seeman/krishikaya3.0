@@ -6,9 +6,30 @@
     <label>Name</label><input name="name" required>
 
 <label for="dob">Date of Birth:</label>
-        <input type="date" id="dob" name="dob" onchange="calculateAge()" required>
+<input type="date" id="dob" name="dob" onchange="calculateAge()" required>
+
 <label for="age">Age:</label>
-        <input type="text" id="age" name="age" readonly>
+<input type="text" id="age" name="age" readonly>
+
+<script>
+function calculateAge() {
+    const dob = document.getElementById('dob').value;
+    if (!dob) return;
+
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    // Adjust age if birthday hasn't occurred yet this year
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+
+    document.getElementById('age').value = age;
+}
+</script>
+
 <label for="gender">Gender:</label>
         <select id="gender" name="gender" required>
             <option value="">Select Gender</option>
@@ -22,18 +43,30 @@
     <label>District</label><input name="district" required>
     <label>Skills / Experience</label><input name="crops" placeholder="e.g., Harvester, Planter">
 
-<label> Type of Workers </label>
-             
-     <label for="option1">
-            <input type="radio" id="option1" name="option" value="option1" onclick="togglePeopleInput()"> Individual
-        </label>
-        <label for="option2">
-            <input type="radio" id="option2" name="option" value="option2" onclick="togglePeopleInput()"> Group
-        </label>
-        <div id="peopleInput" class="hidden">
-            <label for="numberOfPeople">Number of people:</label>
-            <input type="number" id="numberOfPeople" name="numberOfPeople" min="1">
-        </div>
+<label>Type of Workers</label>
+<label for="option1">
+    <input type="radio" id="option1" name="option" value="Individual" onclick="togglePeopleInput()"> Individual
+</label>
+<label for="option2">
+    <input type="radio" id="option2" name="option" value="Group" onclick="togglePeopleInput()"> Group
+</label> 
+<div id="peopleInput" style="display: none;">
+    <label for="numberOfPeople">Number of people:</label>
+    <input type="number" id="numberOfPeople" name="numberOfPeople" min="1">
+</div>
+<script>
+function togglePeopleInput() {
+    const groupOption = document.getElementById('option2');
+    const peopleInput = document.getElementById('peopleInput');
+
+    if (groupOption.checked) {
+        peopleInput.style.display = 'block'; // Show input if Group is selected
+    } else {
+        peopleInput.style.display = 'none';  // Hide input if Individual is selected
+        document.getElementById('numberOfPeople').value = ''; // Clear value
+    }
+}
+</script>
 
 
         <label for="outstation">Ready to Work Outstation:</label>
