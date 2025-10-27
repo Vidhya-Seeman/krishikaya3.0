@@ -40,33 +40,8 @@ function calculateAge() {
 
     <label>Address</label><input name="address" required>
     <label>Contact Number</label><input name="contact" required>
-    <label>District</label><input name="district" required>
     <label>Skills / Experience</label><input name="crops" placeholder="e.g., Harvester, Planter">
 
-<label>Type of Workers</label>
-<label for="option1">
-    <input type="radio" id="option1" name="option" value="Individual" onclick="togglePeopleInput()"> Individual
-</label>
-<label for="option2">
-    <input type="radio" id="option2" name="option" value="Group" onclick="togglePeopleInput()"> Group
-</label> 
-<div id="peopleInput" style="display: none;">
-    <label for="numberOfPeople">Number of people:</label>
-    <input type="number" id="numberOfPeople" name="numberOfPeople" min="1">
-</div>
-<script>
-function togglePeopleInput() {
-    const groupOption = document.getElementById('option2');
-    const peopleInput = document.getElementById('peopleInput');
-
-    if (groupOption.checked) {
-        peopleInput.style.display = 'block'; // Show input if Group is selected
-    } else {
-        peopleInput.style.display = 'none';  // Hide input if Individual is selected
-        document.getElementById('numberOfPeople').value = ''; // Clear value
-    }
-}
-</script>
 
 
         <label for="outstation">Ready to Work Outstation:</label>

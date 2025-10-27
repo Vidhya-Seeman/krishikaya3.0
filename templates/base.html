@@ -5,6 +5,32 @@
   <title>Krishi Kaya</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+  <style>
+    .flash-message {
+      position: fixed;
+      top: 70px;
+      right: 20px;
+      background: #2ecc71;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      opacity: 0.95;
+      z-index: 9999;
+      animation: fadeInOut 3s forwards;
+    }
+    .flash-message.error { background: #e74c3c; }
+    .flash-message.info { background: #3498db; }
+    .flash-message.warning { background: #f39c12; }
+
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateY(-10px); }
+      10%, 90% { opacity: 0.95; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-10px); }
+    }
+  </style>
+
 </head>
 <body>
   <header class="site-header">
@@ -17,17 +43,31 @@
 
       <nav class="main-nav">
         <a href="{{ url_for('home') }}">Home</a>
-        <a href="{{ url_for('register', role='landowner') }}">Landowner Registration</a>
-        <a href="{{ url_for('register', role='labor') }}">Laborer Registration</a>
-        <a href="{{ url_for('register', role='machinery') }}">Machinery Registration</a>
-        <a href="{{ url_for('register', role='admin') }}">Admin Registration</a>
-        <a href="{{ url_for('login') }}">Login</a>
-        {% if session.get('user_id') %}
+
+        {% if not session.get('user_id') %}
+          <!-- Show registration and login only if user not logged in -->
+          <a href="{{ url_for('register', role='landowner') }}">Landowner Registration</a>
+          <a href="{{ url_for('register', role='labor') }}">Laborer Registration</a>
+          <a href="{{ url_for('register', role='machinery') }}">Machinery Registration</a>
+          <a href="{{ url_for('register', role='admin') }}">Admin Registration</a>
+          <a href="{{ url_for('login') }}">Login</a>
+        {% else %}
+          <!-- Show logout only when logged in -->
           <a href="{{ url_for('logout') }}" class="logout">Logout</a>
         {% endif %}
       </nav>
     </div>
   </header>
+
+  <div class="flash-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash-message {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
 
   <main class="container">
     {% block content %}{% endblock %}
@@ -46,7 +86,7 @@
           <img src="{{ url_for('static', filename='images/blog1.jpg') }}" alt="" class="thumb">
           <div class="txt">
             <h5>ABC</h5>
-            <p>Thanks for the support received from krishi kaya team they addressed me with the right path...</p>
+            <p>Thanks for the support received from Krishi Kaya team. They guided me to the right path...</p>
           </div>
         </div>
       </div>
@@ -63,13 +103,13 @@
     </div>
   </footer>
 
-  <!-- small inline script to close toasts if present -->
   <script>
-    window.addEventListener('load', function(){
+    // Auto-hide flash messages/toasts
+    window.addEventListener('load', function() {
       const toasts = document.querySelectorAll('.toast');
       toasts.forEach(t => {
-        setTimeout(()=> t.style.opacity = '0', 2500);
-        setTimeout(()=> t.remove(), 3000);
+        setTimeout(() => t.style.opacity = '0', 2500);
+        setTimeout(() => t.remove(), 3000);
       });
     });
   </script>
