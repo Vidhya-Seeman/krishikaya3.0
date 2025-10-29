@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="panel">
+<div style="display:flex;justify-content:space-between;align-items:center">
   <h2>Admin Dashboard</h2>
-  <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+  <div><a href="{{ url_for('logout') }}" class="logout">Logout</a></div>
 </div>
 
-<!-- Toasts -->
+<!-- Toast messages -->
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     <div class="toast-container">
@@ -16,69 +16,136 @@
   {% endif %}
 {% endwith %}
 
-<section>
+<section style="margin-top:20px;">
   <h3>Registered Landowners</h3>
   <table>
-    <thead><tr><th>ID</th><th>Name</th><th>Username</th><th>Contact</th><th>Acres</th><th>Crops</th></tr></thead>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Username</th>
+        <th>Contact</th>
+        <th>Address</th>
+        <th>Acres</th>
+        <th>Crops</th>
+      </tr>
+    </thead>
     <tbody>
-      {% for l in landowners %}
-        <tr><td>{{ l.id }}</td><td>{{ l.name }}</td><td>{{ l.username }}</td><td>{{ l.contact }}</td><td>{{ l.acres }}</td><td>{{ l.crops }}</td></tr>
+      {% for lo in landowners %}
+        <tr>
+          <td>{{ lo.id }}</td>
+          <td>{{ lo.name or '-' }}</td>
+          <td>{{ lo.username }}</td>
+          <td>{{ lo.contact or '-' }}</td>
+          <td>{{ lo.address or '-' }}</td>
+          <td>{{ lo.acres or '-' }}</td>
+          <td>{{ lo.crops or '-' }}</td>
+        </tr>
       {% else %}
-        <tr><td colspan="6">No landowners</td></tr>
+        <tr><td colspan="7">No landowners registered.</td></tr>
       {% endfor %}
     </tbody>
   </table>
 </section>
 
-<section>
+<section style="margin-top:12px;">
   <h3>Registered Laborers</h3>
   <table>
-    <thead><tr><th>ID</th><th>Name</th><th>Username</th><th>Contact</th></tr></thead>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Username</th>
+        <th>Date of Birth</th>
+        <th>Age</th>
+        <th>Gender</th>
+        <th>Contact</th>
+        <th>Address</th>
+        <th>Skills / Experience</th>
+        <th>Ready to Work Outstation</th>
+      </tr>
+    </thead>
     <tbody>
       {% for l in labors %}
-        <tr><td>{{ l.id }}</td><td>{{ l.name }}</td><td>{{ l.username }}</td><td>{{ l.contact }}</td></tr>
+        <tr>
+          <td>{{ l.id }}</td>
+          <td>{{ l.name or '-' }}</td>
+          <td>{{ l.username }}</td>
+          <td>{{ l.dob or '-' }}</td>
+          <td>{{ l.age or '-' }}</td>
+          <td>{{ l.gender or '-' }}</td>
+          <td>{{ l.contact or '-' }}</td>
+          <td>{{ l.address or '-' }}</td>
+          <td>{{ l.skills or '-' }}</td>
+          <td>{{ l.outstation or '-' }}</td>
+        </tr>
       {% else %}
-        <tr><td colspan="4">No laborers</td></tr>
+        <tr><td colspan="10">No laborers registered</td></tr>
       {% endfor %}
     </tbody>
   </table>
 </section>
 
-<section>
+
+<section style="margin-top:20px;">
   <h3>Registered Machineries</h3>
   <table>
-    <thead><tr><th>ID</th><th>Owner</th><th>Machine Type</th><th>Contact</th></tr></thead>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Username</th>
+        <th>Machine Type</th>
+        <th>Contact</th>
+        <th>Address</th>
+      </tr>
+    </thead>
     <tbody>
       {% for m in machineries %}
-        <tr><td>{{ m.id }}</td><td>{{ m.name }}</td><td>{{ m.machine_type }}</td><td>{{ m.contact }}</td></tr>
+        <tr>
+          <td>{{ m.id }}</td>
+          <td>{{ m.name or '-' }}</td>
+          <td>{{ m.username }}</td>
+          <td>{{ m.machine_type or '-' }}</td>
+          <td>{{ m.contact or '-' }}</td>
+          <td>{{ m.address or '-' }}</td>
+        </tr>
       {% else %}
-        <tr><td colspan="4">No machineries</td></tr>
+        <tr><td colspan="6">No machineries registered.</td></tr>
       {% endfor %}
     </tbody>
   </table>
 </section>
 
-<section>
+<section style="margin-top:20px;">
   <h3>All Bookings</h3>
   <table>
-    <thead><tr><th>ID</th><th>Landowner</th><th>Type</th><th>Date</th><th>Days</th><th>Labor Status</th><th>Machinery Status</th></tr></thead>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Landowner</th>
+        <th>Service Type</th>
+        <th>Date</th>
+        <th>Days</th>
+        <th>Labor Status</th>
+        <th>Machinery Status</th>
+      </tr>
+    </thead>
     <tbody>
-  {% for b in bookings %}
-    <tr>
-      <td>{{ b.id }}</td>
-      <td>{{ b.landowner_name }}</td>
-      <td>{{ b.service_type }}</td>
-      <td>{{ b.service_date }}</td>
-      <td>{{ b.days }}</td>
-      <td>{{ b.labor_status }}</td>
-      <td>{{ b.machinery_status }}</td>
-      <td>{{ b.action }}</td>
-    </tr>
-  {% else %}
-    <tr><td colspan="8">No bookings</td></tr>
-  {% endfor %}
-</tbody>
-
+      {% for b in bookings %}
+        <tr>
+          <td>{{ b.id }}</td>
+          <td>{{ b.landowner_name }}</td>
+          <td>{{ b.service_type }}</td>
+          <td>{{ b.service_date }}</td>
+          <td>{{ b.days }}</td>
+          <td>{{ b.labor_status }}</td>
+          <td>{{ b.machinery_status }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="7">No bookings yet.</td></tr>
+      {% endfor %}
+    </tbody>
   </table>
 </section>
 {% endblock %}

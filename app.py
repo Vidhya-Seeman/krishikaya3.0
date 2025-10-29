@@ -23,6 +23,12 @@ class User(db.Model):
     crops = db.Column(db.String(200))
     machine_type = db.Column(db.String(100))
     num_labors = db.Column(db.Integer)
+    dob = db.Column(db.String(50))
+    age = db.Column(db.Integer)
+    gender = db.Column(db.String(20))
+    skills = db.Column(db.String(200))
+    outstation = db.Column(db.String(10))  # Yes/No
+    
 
 
 class Booking(db.Model):
@@ -87,6 +93,11 @@ def register(role):
             crops=form.get("crops") if role == "landowner" else None,
             machine_type=form.get("machine_type") if role == "machinery" else None,
             num_labors=form.get("num_labors") if role == "labor" else None,
+	    dob=form.get("dob") if role == "labor" else None,
+            age=form.get("age") if role == "labor" else None,
+            gender=form.get("gender") if role == "labor" else None,
+            skills=form.get("skills") if role == "labor" else None,
+            outstation=form.get("outstation") if role == "labor" else None
         )
         db.session.add(user)
         db.session.commit()
@@ -127,6 +138,7 @@ def logout():
 
 
 # ---------------- LANDOWNER ---------------- #
+# ---------------- LANDOWNER ---------------- #
 @app.route("/landowner", methods=["GET", "POST"])
 def landowner_dashboard():
     user = current_user()
@@ -134,15 +146,15 @@ def landowner_dashboard():
         flash("Login as landowner first", "danger")
         return redirect(url_for("login"))
 
+    # --- Handle booking creation ---
     if request.method == "POST":
         form = request.form
-        # single booking entry even if multiple labors requested
         b = Booking(
             landowner_id=user.id,
             service_date=form["service_date"],
-            days=int(form["days"]),
-            service_type=form["service_type"],
-            num_labor=int(form.get("num_labor")) if form.get("num_labor") else 0,
+            days=form["days"],
+            service_type=form["service_type"].strip().lower(),
+            num_labor=form.get("num_labor"),
             machine_type=form.get("machine_type"),
         )
         db.session.add(b)
@@ -150,59 +162,77 @@ def landowner_dashboard():
         flash("Booking created successfully!", "success")
         return redirect(url_for("landowner_dashboard"))
 
+    # --- Prepare display for existing bookings ---
     bookings = Booking.query.filter_by(landowner_id=user.id).all()
-    booking_data = []
     total_labors = User.query.filter_by(role="labor").count()
     total_machs = User.query.filter_by(role="machinery").count()
 
+    bookings_display = []
     for b in bookings:
-        # labor accepted/rejected counts & names
-        lab_accept_q = BookingResponse.query.filter_by(booking_id=b.id, user_role="labor", response="Accept").all()
-        lab_reject_q = BookingResponse.query.filter_by(booking_id=b.id, user_role="labor", response="Reject").all()
-        accepted_lab_names = [User.query.get(r.user_id).name for r in lab_accept_q]
-        rejected_lab_count = len(lab_reject_q)
-        accepted_lab_count = len(lab_accept_q)
+        stype = (b.service_type or "").strip().lower()
+        num_labor = int(b.num_labor) if b.num_labor else 0
 
-        # machinery accepted/rejected counts & names
-        mach_accept_q = BookingResponse.query.filter_by(booking_id=b.id, user_role="machinery", response="Accept").all()
-        mach_reject_q = BookingResponse.query.filter_by(booking_id=b.id, user_role="machinery", response="Reject").all()
-        accepted_mach_names = [User.query.get(r.user_id).name for r in mach_accept_q]
-        rejected_mach_count = len(mach_reject_q)
-        accepted_mach_count = len(mach_accept_q)
+        # accepted/rejected labor responses
+        accepted_lab_q = BookingResponse.query.filter_by(
+            booking_id=b.id, user_role="labor", response="Accept"
+        ).all()
+        rejected_lab_count = BookingResponse.query.filter_by(
+            booking_id=b.id, user_role="labor", response="Reject"
+        ).count()
+        accepted_lab_count = len(accepted_lab_q)
+        accepted_lab_names = [User.query.get(r.user_id).name for r in accepted_lab_q]
 
-        # labor status string
-        if b.num_labor and accepted_lab_count >= b.num_labor:
-            labor_status = "Confirmed"
-        elif b.num_labor:
-            labor_status = f"{accepted_lab_count}/{b.num_labor} Accepted"
-            if rejected_lab_count >= total_labors:
-                labor_status = "Rejected"
+        # accepted/rejected machinery responses
+        accepted_mach_q = BookingResponse.query.filter_by(
+            booking_id=b.id, user_role="machinery", response="Accept"
+        ).all()
+        rejected_mach_count = BookingResponse.query.filter_by(
+            booking_id=b.id, user_role="machinery", response="Reject"
+        ).count()
+        accepted_mach_names = [User.query.get(r.user_id).name for r in accepted_mach_q]
+
+        # ---- labor status ----
+        if stype == "machinery":
+            labor_status = "N/A"
+        elif stype in ("labor", "both"):
+            if num_labor > 0:
+                if accepted_lab_count >= num_labor:
+                    labor_status = f"Confirmed ({', '.join(accepted_lab_names)})"
+                elif rejected_lab_count >= total_labors and total_labors > 0:
+                    labor_status = "Rejected"
+                else:
+                    labor_status = f"{accepted_lab_count}/{num_labor} Accepted"
+            else:
+                labor_status = "N/A"
         else:
             labor_status = "N/A"
 
-        # machinery status string: require at least one machinery accept to confirm
-        if accepted_mach_count > 0:
-            machinery_status = "Confirmed (" + ", ".join(accepted_mach_names) + ")"
-        else:
-            if rejected_mach_count >= total_machs and total_machs>0:
+        # ---- machinery status ----
+        if stype == "labor":
+            machinery_status = "N/A"
+        elif stype in ("machinery", "both"):
+            if len(accepted_mach_q) > 0:
+                machinery_status = f"Confirmed ({', '.join(accepted_mach_names)})"
+            elif rejected_mach_count >= total_machs and total_machs > 0:
                 machinery_status = "Rejected"
             else:
                 machinery_status = "Pending"
+        else:
+            machinery_status = "N/A"
 
-        # overall action: closed if both required parts satisfied or rejected fully
-        # (landowner asked for both -> both need to be decided)
-        if b.service_type == "both":
-            labor_closed = (b.num_labor and accepted_lab_count >= b.num_labor) or (rejected_lab_count >= total_labors)
-            mach_closed = (accepted_mach_count>0) or (rejected_mach_count >= total_machs)
-            action = "Closed" if labor_closed and mach_closed else "Pending"
-        elif b.service_type == "labor":
-            action = "Closed" if (b.num_labor and accepted_lab_count >= b.num_labor) or (rejected_lab_count >= total_labors) else "Pending"
-        elif b.service_type == "machinery":
-            action = "Closed" if (accepted_mach_count>0) or (rejected_mach_count >= total_machs) else "Pending"
+        # ---- overall action ----
+        if stype == "both":
+            labor_closed = labor_status.startswith("Confirmed") or labor_status == "Rejected"
+            mach_closed = machinery_status.startswith("Confirmed") or machinery_status == "Rejected"
+            action = "Closed" if (labor_closed and mach_closed) else "Pending"
+        elif stype == "labor":
+            action = "Closed" if labor_status.startswith("Confirmed") or labor_status == "Rejected" else "Pending"
+        elif stype == "machinery":
+            action = "Closed" if machinery_status.startswith("Confirmed") or machinery_status == "Rejected" else "Pending"
         else:
             action = "Pending"
 
-        booking_data.append({
+        bookings_display.append({
             "id": b.id,
             "service_date": b.service_date,
             "days": b.days,
@@ -211,12 +241,12 @@ def landowner_dashboard():
             "machine_type": b.machine_type,
             "labor_status": labor_status,
             "machinery_status": machinery_status,
-            "accepted_lab_names": accepted_lab_names,
-            "accepted_mach_names": accepted_mach_names,
             "action": action
         })
 
-    return render_template("landowner_dashboard.html", landowner=user, bookings=booking_data)
+    return render_template("landowner_dashboard.html",
+                           landowner=user,
+                           bookings=bookings_display)
 
 
 
@@ -358,6 +388,7 @@ def machinery_dashboard():
 
 
 # ---------------- ADMIN ---------------- #
+# ---------------- ADMIN ---------------- #
 @app.route("/admin")
 def admin_dashboard():
     user = current_user()
@@ -375,44 +406,81 @@ def admin_dashboard():
 
     bookings_display = []
     for b in bookings:
-        accepted_lab_q = BookingResponse.query.filter_by(booking_id=b.id, user_role="labor", response="Accept").all()
-        rejected_lab_count = BookingResponse.query.filter_by(booking_id=b.id, user_role="labor", response="Reject").count()
+        # normalize service_type (defensive)
+        stype = (b.service_type or "").strip().lower()
+
+        # safe integer for num_labor
+        num_labor = int(b.num_labor) if b.num_labor else 0
+
+        # Get accepted/rejected labors
+        accepted_lab_q = BookingResponse.query.filter_by(
+            booking_id=b.id, user_role="labor", response="Accept"
+        ).all()
+        rejected_lab_count = BookingResponse.query.filter_by(
+            booking_id=b.id, user_role="labor", response="Reject"
+        ).count()
         accepted_lab_count = len(accepted_lab_q)
         accepted_lab_names = [User.query.get(r.user_id).name for r in accepted_lab_q]
 
-        accepted_mach_q = BookingResponse.query.filter_by(booking_id=b.id, user_role="machinery", response="Accept").all()
-        rejected_mach_count = BookingResponse.query.filter_by(booking_id=b.id, user_role="machinery", response="Reject").count()
+        # Get accepted/rejected machinery
+        accepted_mach_q = BookingResponse.query.filter_by(
+            booking_id=b.id, user_role="machinery", response="Accept"
+        ).all()
+        rejected_mach_count = BookingResponse.query.filter_by(
+            booking_id=b.id, user_role="machinery", response="Reject"
+        ).count()
         accepted_mach_names = [User.query.get(r.user_id).name for r in accepted_mach_q]
 
-        # labour status
-        if b.num_labor and accepted_lab_count >= b.num_labor:
-            labor_status = "Confirmed (" + ", ".join(accepted_lab_names) + ")"
-        elif rejected_lab_count >= total_labors and total_labors>0:
-            labor_status = "Rejected"
+        # --- Labor status logic ---
+        if stype == "machinery":
+            labor_status = "N/A"
+        elif stype in ("labor", "both"):
+            # show progress: x/num Accepted (if num_labor>0) else show N/A
+            if num_labor > 0:
+                if accepted_lab_count >= num_labor:
+                    labor_status = f"Confirmed ({', '.join(accepted_lab_names)})"
+                elif rejected_lab_count >= total_labors and total_labors > 0:
+                    labor_status = "Rejected"
+                else:
+                    labor_status = f"{accepted_lab_count}/{num_labor} Accepted"
+            else:
+                # no quantity asked
+                labor_status = "N/A"
         else:
-            labor_status = f"{accepted_lab_count}/{b.num_labor or 0} Accepted"
+            labor_status = "N/A"
 
-        # machinery status
-        if len(accepted_mach_q) > 0:
-            machinery_status = "Confirmed (" + ", ".join(accepted_mach_names) + ")"
-        elif rejected_mach_count >= total_machs and total_machs>0:
-            machinery_status = "Rejected"
+        # --- Machinery status logic ---
+        if stype == "labor":
+            machinery_status = "N/A"
+        elif stype in ("machinery", "both"):
+            # machinery considered confirmed when at least one accepts
+            if len(accepted_mach_q) > 0:
+                machinery_status = f"Confirmed ({', '.join(accepted_mach_names)})"
+            elif rejected_mach_count >= total_machs and total_machs > 0:
+                machinery_status = "Rejected"
+            else:
+                machinery_status = "Pending"
         else:
-            machinery_status = "Pending"
+            machinery_status = "N/A"
 
-        # overall action (for admin display)
-        if b.service_type == "both":
-            action = "Closed" if (labor_status.startswith("Confirmed") or labor_status=="Rejected") and (machinery_status.startswith("Confirmed") or machinery_status=="Rejected") else "Pending"
-        elif b.service_type == "labor":
-            action = "Closed" if labor_status.startswith("Confirmed") or labor_status=="Rejected" else "Pending"
-        elif b.service_type == "machinery":
-            action = "Closed" if machinery_status.startswith("Confirmed") or machinery_status=="Rejected" else "Pending"
+        # --- Overall action logic ---
+        if stype == "both":
+            labor_closed = labor_status.startswith("Confirmed") or labor_status == "Rejected"
+            mach_closed = machinery_status.startswith("Confirmed") or machinery_status == "Rejected"
+            action = "Closed" if (labor_closed and mach_closed) else "Pending"
+        elif stype == "labor":
+            action = "Closed" if labor_status.startswith("Confirmed") or labor_status == "Rejected" else "Pending"
+        elif stype == "machinery":
+            action = "Closed" if machinery_status.startswith("Confirmed") or machinery_status == "Rejected" else "Pending"
         else:
             action = "Pending"
 
+        landowner = User.query.get(b.landowner_id)
         bookings_display.append({
             "id": b.id,
-            "landowner_name": User.query.get(b.landowner_id).name,
+            "landowner_name": landowner.name if landowner else "Unknown",
+            "landowner_contact": landowner.contact if landowner else "-",
+            "landowner_address": landowner.address if landowner else "-",
             "service_type": b.service_type,
             "service_date": b.service_date,
             "days": b.days,
@@ -421,11 +489,13 @@ def admin_dashboard():
             "action": action
         })
 
-    return render_template("admin_dashboard.html",
-                           landowners=landowners,
-                           labors=labors,
-                           machineries=machineries,
-                           bookings=bookings_display)
+    return render_template(
+        "admin_dashboard.html",
+        landowners=landowners,
+        labors=labors,
+        machineries=machineries,
+        bookings=bookings_display
+    )
 
 
 if __name__ == "__main__":
